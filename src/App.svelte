@@ -21,28 +21,39 @@
   let hovered, selected;
   let geojson;
 
-  let xKey = "area";
+  let xKey = "education";
   let yKey = null;
   let zKey = null;
   let rKey = null;
   let explore = false;
 
-  let data = { district: {}, region: {} };
-  let metadata = { district: {}, region: {} };
-  const datasets = ["region", "district"];
+  let data = { region: {} };
+  let metadata = { region: {} };
+  const datasets = ["region"];
 
-  $: region = selected && metadata.district.lookup ? metadata.district.lookup[selected].parent : null;
-  $: chartHighlighted = metadata.district.array && region
-    ? metadata.district.array.filter(d => d.parent == region).map(d => d.code)
+  // Hardcoded data for testing (comment out when loading CSV)
+  data.region.indicators = [
+    { code: "01", name: "Alabama", education: 35, poverty: 500, pop: 5000, region: "Deep South" },
+    { code: "02", name: "Georgia", education: 40, poverty: 450, pop: 6000, region: "Deep South" }
+  ];
+
+  // Reactive statement: get region based on selected code (fixed to avoid metadata lookup)
+  $: region = selected
+    ? data.region.indicators.find(d => d.code === selected)?.region ?? null
+    : null;
+
+  // Highlight all codes with matching region
+  $: chartHighlighted = region
+    ? data.region.indicators.filter(d => d.region === region).map(d => d.code)
     : [];
 
   const actions = {
     chart: {
-      chart01: () => { xKey = "area"; yKey = null; zKey = null; rKey = null; explore = false; },
-      chart02: () => { xKey = "area"; yKey = null; zKey = null; rKey = "pop"; explore = false; },
-      chart03: () => { xKey = "area"; yKey = "density"; zKey = null; rKey = "pop"; explore = false; },
-      chart04: () => { xKey = "area"; yKey = "density"; zKey = "parent_name"; rKey = "pop"; explore = false; },
-      chart05: () => { xKey = "area"; yKey = "density"; zKey = null; rKey = "pop"; explore = true; }
+      chart01: () => { xKey = "education"; yKey = null; zKey = null; rKey = null; explore = false; },
+      chart02: () => { xKey = "education"; yKey = null; zKey = null; rKey = "pop"; explore = false; },
+      chart03: () => { xKey = "education"; yKey = "poverty"; zKey = null; rKey = "pop"; explore = false; },
+      chart04: () => { xKey = "education"; yKey = "poverty"; zKey = "region"; rKey = "pop"; explore = false; },
+      chart05: () => { xKey = "education"; yKey = "poverty"; zKey = null; rKey = "pop"; explore = true; }
     }
   };
 
@@ -65,6 +76,8 @@
 
   $: id && runActions(Object.keys(actions));
 
+  /*
+  // Uncomment this block to load data from CSV instead of using hardcoded data above
   datasets.forEach(geo => {
     getData(`./data/data_${geo}.csv`)
       .then(arr => {
@@ -79,33 +92,16 @@
 
         let indicators = arr.map((d, i) => ({
           ...meta[i],
-          area: d.area,
-          pop: d['2020'],
-          density: d.density,
-          age_med: d.age_med
+          education: +d.education,
+          poverty: +d.poverty,
+          pop: +d.pop,
+          region: d.region
         }));
 
-        if (geo === "district") {
-          ['density', 'age_med'].forEach(key => {
-            const values = indicators.map(d => d[key]).sort((a, b) => a - b);
-            const breaks = getBreaks(values);
-            indicators.forEach(d => d[`${key}_color`] = getColor(d[key], breaks, colors.seq));
-          });
-        }
-
         data[geo].indicators = indicators;
-
-        const years = Array.from({ length: 20 }, (_, i) => 2001 + i);
-        data[geo].timeseries = arr.flatMap(d =>
-          years.map(year => ({
-            code: d.code,
-            name: d.name,
-            value: d[year],
-            year
-          }))
-        );
       });
   });
+  */
 
   getTopo('./data/geo_lad2021.json', 'geog').then(geo => {
     geo.features.sort((a, b) => a.properties.AREANM.localeCompare(b.properties.AREANM));
@@ -154,13 +150,15 @@
   <div slot="background">
     <figure>
       <div class="col-wide height-full">
-        {#if data.district.indicators && metadata.region.lookup}
+        <!-- metadata lookup commented since not used -->
+		{#if data.region.indicators}
+
           <div class="chart">
             <ScatterChart
               height="calc(100vh - 150px)"
-              data={data.district.indicators.map(d => ({
+              data={data.region.indicators.map(d => ({
                 ...d,
-                parent_name: metadata.region.lookup[d.parent]?.name
+                // parent_name: metadata.region.lookup[d.region]?.name // commented because metadata not used now
               }))}
               colors={explore ? ['lightgrey'] : colors.cat}
               {xKey} {yKey} {zKey} {rKey}
@@ -192,19 +190,19 @@
   </div>
 
   <div slot="foreground">
-    <section data-id="chart01"><div class="col-medium"><p>This chart shows the <strong>area</strong> of each district.</p></div></section>
+    <section data-id="chart01"><div class="col-medium"><p>This chart shows the <strong>education</strong> of each state.</p></div></section>
     <section data-id="chart02"><div class="col-medium"><p>Radius shows the <strong>population</strong>.</p></div></section>
-    <section data-id="chart03"><div class="col-medium"><p>Vertical axis = <strong>density</strong>.</p></div></section>
+    <section data-id="chart03"><div class="col-medium"><p>Vertical axis = <strong>poverty</strong>.</p></div></section>
     <section data-id="chart04"><div class="col-medium"><p>Color shows <strong>region</strong>.</p></div></section>
     <section data-id="chart05">
       <div class="col-medium">
         <h3>Select a district</h3>
         <p>You can use the dropdown to highlight all districts in the same region.</p>
-        {#if geojson}
+        {#if data.region.indicators}
           <select bind:value={selected}>
             <option value={null}>Select one</option>
-            {#each geojson.features as place}
-              <option value={place.properties.AREACD}>{place.properties.AREANM}</option>
+            {#each data.region.indicators as d}
+              <option value={d.code}>{d.name}</option>
             {/each}
           </select>
         {/if}
@@ -326,7 +324,7 @@
   }
 
   section[data-id^="chart"] {
-	background-color: #034c36;
-	color: white; 
-	}
+    background-color: #034c36;
+    color: white; 
+  }
 </style>
