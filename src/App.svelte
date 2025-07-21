@@ -131,7 +131,7 @@
   });
 </script>
 
-<!-- 🌟 TITLE CARD -->
+<!-- TITLE CARD -->
 <div class="title-card">
   <div class="content">
     {#if intro}
@@ -144,10 +144,10 @@
   </div>
 </div>
 
-<!-- 📊 VISUALIZATION SECTION -->
+<!-- VISUALIZATION SECTION -->
 <Section>
-  <h2>This is a dynamic chart section</h2>
-  <p>The chart below will respond to the captions as you scroll down.</p>
+  <h2>The correlation between poverty and education</h2>
+  <p>by regions in the United States</p>
 </Section>
 
 <Scroller {threshold} bind:id={id['chart']} splitscreen={true}>
@@ -213,7 +213,7 @@
   </div>
 </Scroller>
 
-<!-- 📘 ENDING NARRATIVE SECTIONS -->
+<!-- ENDING NARRATIVE SECTIONS -->
 {#each articleSections as text (text)}
   <div class="article-text">
     <p>{@html text}</p>
@@ -261,6 +261,14 @@
     text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
   }
 
+  h2 {
+    font-family: "Abril Fatface", serif;
+    font-size: 2rem;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+  }
+
   .chart {
     margin-top: 45px;
     width: calc(100% - 5px);
@@ -291,7 +299,7 @@
   }
 
   :global(body) {
-    background-color: pink;
+    background-color: #034c36;
     transition: background-color 1s ease;
   }
 
@@ -316,4 +324,9 @@
       font-size: 1rem;
     }
   }
+
+  section[data-id^="chart"] {
+	background-color: #034c36;
+	color: white; 
+	}
 </style>
