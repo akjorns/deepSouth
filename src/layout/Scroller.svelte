@@ -199,12 +199,14 @@
 		display: block;
 		position: relative;
 		max-width: 100%;
+		color: pink; 
 	}
 
 	svelte-scroller-background {
 		display: block;
 		position: relative;
 		width: 100%;
+		color: red;
 	}
 
 	svelte-scroller-foreground {
