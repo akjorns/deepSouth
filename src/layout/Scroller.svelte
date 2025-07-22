@@ -80,11 +80,11 @@
 	export let offset = 0;
 	export let progress = 0;
 	export let visible = false;
-	export let splitscreen = false; // Add class to allow for split screen option
+	export let splitscreen = false; 
 	export let id = null;
 
 	let outer;
-  let bgContainer; // IE patch. Container binding to update inline style
+  let bgContainer;
 	let foreground;
 	let background;
 	let left;
@@ -114,7 +114,7 @@
 		return () => manager.remove(scroller);
 	});
 
-	// IE patch. BG container style (fixed/unfixed) set via function
+	
   function setFixed() {
     if (bgContainer) {
       let style = `position: ${fixed ? 'fixed' : 'absolute'}; top: 0; transform: translate(0, ${offset_top}px); width: ${width}px; z-index: ${inverted ? 3 : 1};`;
@@ -125,12 +125,12 @@
 	function update() {
 		if (!foreground) return;
 
-		// re-measure outer container
+		
 		const bcr = outer.getBoundingClientRect();
 		left = bcr.left;
 		width = bcr.right - bcr.left;
 
-		// determine fix state
+		
 		const fg = foreground.getBoundingClientRect();
 		const bg = background.getBoundingClientRect();
 
@@ -147,7 +147,7 @@
       if (fixed) {
         fixed = false;
         setFixed();
-      } // Non-IE specific patch to avoid setting style repeatedly
+      } 
 		} else if (progress >= 1) {
 			offset_top = parallax
 				? (foreground_height - background_height)
@@ -206,7 +206,7 @@
 		display: block;
 		position: relative;
 		width: 100%;
-		color: red;
+		color: #FAD9F9;
 	}
 
 	svelte-scroller-foreground {
@@ -227,12 +227,8 @@
 		width: 100%;
 		max-width: 100%;
 		pointer-events: none;
-		/* height: 100%; */
-
-		/* in theory this helps prevent jumping */
+		
 		will-change: transform;
-		/* -webkit-transform: translate3d(0, 0, 0);
-		-moz-transform: translate3d(0, 0, 0);
-		transform: translate3d(0, 0, 0); */
+		
 	}
 </style>

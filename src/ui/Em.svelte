@@ -1,7 +1,7 @@
 <script>
   import parse from 'parse-color';
 
-  export let color = 'lightgrey';
+  export let color = 'red';
 	export let nowrap = true;
 
   function textColor(rgb) {

@@ -1,4 +1,7 @@
 <script>
+ //alex app.svelte for KWK 
+  // java
+  // script - setup and data logic for scatter plot
   import { setContext, onMount } from "svelte";
   import { getMotion, getData, setColors, getTopo, getBreaks, getColor } from "./utils.js";
   import { themes, colors } from "./config.js";
@@ -6,7 +9,7 @@
   import Section from "./layout/Section.svelte";
   import Scroller from "./layout/Scroller.svelte";
 
-  const intro = "an analysis of disparities in the";
+  const intro = "education and inequality in the";
   const title = "Deep South";
   const subtitle = "by Alex Jorns";
 
@@ -31,22 +34,22 @@
   let metadata = { region: {} };
   const datasets = ["region"];
 
-  // Hardcoded data for testing (comment out when loading CSV)
+  // hardcoded data - scatter plot
   data.region.indicators = [
   { code: "01", name: "Alabama", education: 40, poverty: 15.6, pop: 27, region: "Deep South" },
+  { code: "10", name: "Delaware", education: 29, poverty: 10.5, pop: 24, region: "South" },
+  { code: "17", name: "Illinois", education: 26, poverty: 11.6, pop: 15, region: "Midwest" },
   { code: "02", name: "Alaska", education: 28, poverty: 10.4, pop: 4, region: "West" },
   { code: "04", name: "Arizona", education: 31, poverty: 12.4, pop: 6, region: "West" },
   { code: "05", name: "Arkansas", education: 31, poverty: 15.7, pop: 16, region: "Deep South" },
   { code: "06", name: "California", education: 35, poverty: 12.0, pop: 6, region: "West" },
   { code: "08", name: "Colorado", education: 23, poverty: 9.3, pop: 5, region: "West" },
   { code: "09", name: "Connecticut", education: 18, poverty: 10.3, pop: 13, region: "Northeast" },
-  { code: "10", name: "Delaware", education: 29, poverty: 10.5, pop: 24, region: "South" },
   { code: "11", name: "District of Columbia", education: 46, poverty: 14.0, pop: 44, region: "South" },
   { code: "12", name: "Florida", education: 30, poverty: 12.3, pop: 17, region: "South" },
   { code: "13", name: "Georgia", education: 32, poverty: 13.6, pop: 33, region: "Deep South" },
   { code: "15", name: "Hawaii", education: 28, poverty: 10.1, pop: 2, region: "West" },
   { code: "16", name: "Idaho", education: 22, poverty: 10.1, pop: 1, region: "West" },
-  { code: "17", name: "Illinois", education: 26, poverty: 11.6, pop: 15, region: "Midwest" },
   { code: "18", name: "Indiana", education: 23, poverty: 12.3, pop: 10, region: "Midwest" },
   { code: "19", name: "Iowa", education: 17, poverty: 11.3, pop: 5, region: "Midwest" },
   { code: "20", name: "Kansas", education: 21, poverty: 11.2, pop: 6, region: "Midwest" },
@@ -86,14 +89,12 @@
   { code: "56", name: "Wyoming", education: 19, poverty: 11.3, pop: 1, region: "West" }
 ];
 
-
-
-  // Reactive statement: get region based on selected code (fixed to avoid metadata lookup)
+//for filter select
   $: region = selected
     ? data.region.indicators.find(d => d.code === selected)?.region ?? null
     : null;
 
-  // Highlight all codes with matching region
+  
   $: chartHighlighted = region
     ? data.region.indicators.filter(d => d.region === region).map(d => d.code)
     : [];
@@ -104,7 +105,7 @@
       chart02: () => { xKey = "education"; yKey = null; zKey = null; rKey = "pop"; explore = false; },
       chart03: () => { xKey = "education"; yKey = "poverty"; zKey = null; rKey = "pop"; explore = false; },
       chart04: () => { xKey = "education"; yKey = "poverty"; zKey = "region"; rKey = "pop"; explore = false; },
-      chart05: () => { xKey = "education"; yKey = "poverty"; zKey = null; rKey = "pop"; explore = true; }
+      chart05: () => { xKey = "education"; yKey = "poverty"; zKey = "region"; rKey = "pop"; explore = true; }
     }
   };
 
@@ -127,32 +128,6 @@
 
   $: id && runActions(Object.keys(actions));
 
-  /*
-  // Uncomment this block to load data from CSV instead of using hardcoded data above
-  datasets.forEach(geo => {
-    getData(`./data/data_${geo}.csv`)
-      .then(arr => {
-        let meta = arr.map(d => ({
-          code: d.code,
-          name: d.name,
-          parent: d.parent || null
-        }));
-        let lookup = Object.fromEntries(meta.map(d => [d.code, d]));
-        metadata[geo].array = meta;
-        metadata[geo].lookup = lookup;
-
-        let indicators = arr.map((d, i) => ({
-          ...meta[i],
-          education: +d.education,
-          poverty: +d.poverty,
-          pop: +d.pop,
-          region: d.region
-        }));
-
-        data[geo].indicators = indicators;
-      });
-  });
-  */
 
   getTopo('./data/geo_lad2021.json', 'geog').then(geo => {
     geo.features.sort((a, b) => a.properties.AREANM.localeCompare(b.properties.AREANM));
@@ -178,7 +153,7 @@
   });
 </script>
 
-<!-- TITLE CARD -->
+<!-- title -->
 <div class="title-card">
   <div class="content">
     {#if intro}
@@ -191,17 +166,16 @@
   </div>
 </div>
 
-<!-- VISUALIZATION SECTION -->
+<!-- chart -->
 <Section>
-  <h2>The correlation between poverty and education</h2>
-  <p>by regions in the United States</p>
+  <h2>Correlation Between Poverty and Education</h2>
+  <h3>analyzed by U.S. region</h3>
 </Section>
 
 <Scroller {threshold} bind:id={id['chart']} splitscreen={true}>
   <div slot="background">
     <figure>
       <div class="col-wide height-full">
-        <!-- metadata lookup commented since not used -->
 		{#if data.region.indicators}
 
           <div class="chart">
@@ -209,16 +183,15 @@
               height="calc(100vh - 150px)"
               data={data.region.indicators.map(d => ({
                 ...d,
-                // parent_name: metadata.region.lookup[d.region]?.name // commented because metadata not used now
               }))}
               colors={explore ? ['lightgrey'] : colors.cat}
               {xKey} {yKey} {zKey} {rKey}
               idKey="code" labelKey="name"
               r={[3, 10]}
               xScale="linear"
-				xTicks={[0, 20, 40, 60, 80, 100]}
+				xTicks={[15, 20, 25, 30, 35, 40, 45, 50]}
 				xFormatTick={d => `${d}%`}
-              yFormatTick={d => d.toLocaleString()}
+              yFormatTick={d => `${d}%`}
               legend={zKey != null}
               labels
               select={explore}
@@ -240,14 +213,17 @@
   </div>
 
   <div slot="foreground">
-    <section data-id="chart01"><div class="col-medium"><p>This chart shows the <strong>education</strong> of each state.</p></div></section>
-    <section data-id="chart02"><div class="col-medium"><p>Radius shows the <strong>population</strong>.</p></div></section>
-    <section data-id="chart03"><div class="col-medium"><p>Vertical axis = <strong>poverty</strong>.</p></div></section>
-    <section data-id="chart04"><div class="col-medium"><p>Color shows <strong>region</strong>.</p></div></section>
+    <section data-id="chart01"><div class="col-medium"><p>The x-axis represents the percent of students performing <strong>below basic</strong> in reading, broken down by state, based on NAEP’s performance standards.</p></div></section>
+    <section data-id="chart02"><div class="col-medium"><p>Radius shows the <strong>black population percentage</strong> by state as listed in the BWDC.</p></div></section>
+    <section data-id="chart03"><div class="col-medium"><p>The y-axis represents the percent of the state considered below <strong>poverty</strong>.</p></div></section>
+    <section data-id="chart04"><div class="col-medium"><p>Color shows <strong>region</strong> as defined by:<br><strong>Deep South:</strong> Alabama, Arkansas, Georgia, Louisiana, Mississippi, South Carolina, Tennessee, Texas<br>
+		<strong>West:</strong> Alaska, Arizona, California, Colorado, Hawaii, Idaho, Montana, Nevada, New Mexico, Oregon, Utah, Washington, Wyoming<br><strong>Northeast:</strong> Connecticut, Maine, Massachusetts, New Hampshire, New Jersey, New York, Pennsylvania, Rhode Island, Vermont<br>
+      <strong>South:</strong> Delaware, District of Columbia, Florida, Kentucky, Maryland, North Carolina, Oklahoma, Virginia, West Virginia<br>
+      <strong>Midwest:</strong> Illinois, Indiana, Iowa, Kansas, Michigan, Minnesota, Missouri, Nebraska, North Dakota, Ohio, South Dakota, Wisconsin</p></div></section>
+		
     <section data-id="chart05">
       <div class="col-medium">
-        <h3>Select a district</h3>
-        <p>You can use the dropdown to highlight all districts in the same region.</p>
+        <p>Select a state</p>
         {#if data.region.indicators}
           <select bind:value={selected}>
             <option value={null}>Select one</option>
@@ -261,7 +237,7 @@
   </div>
 </Scroller>
 
-<!-- ENDING NARRATIVE SECTIONS -->
+<!-- ending text -->
 {#each articleSections as text (text)}
   <div class="article-text">
     <p>{@html text}</p>
@@ -271,7 +247,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Nunito:wght@400;600&display=swap');
 
-  /* Title Card */
+  /* css */
   .title-card {
     background-color: #034c36;
     height: 100vh;
@@ -281,7 +257,7 @@
     text-align: center;
     padding: 2rem;
     box-sizing: border-box;
-    font-family: "Nunito", sans-serif;
+    font-family: "Abril Fatface", serif;
   }
 
   .content {
@@ -317,6 +293,14 @@
     text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
   }
 
+  h3 {
+    font-family: "Abril Fatface", serif;
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+  }
+
   .chart {
     margin-top: 45px;
     width: calc(100% - 5px);
@@ -329,7 +313,7 @@
   .article-text {
     margin: 50vh auto;
     width: 60%;
-    background-color: #ff99fc;
+    background-color: #FAD9F9;
     color: #007052;
     border: 3px solid #034c36;
     border-radius: 20px;
@@ -342,8 +326,10 @@
     transition: background-color 0.5s ease;
   }
 
+
   strong {
     font-weight: bold;
+	color: #DAA6D3;
   }
 
   :global(body) {

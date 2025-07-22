@@ -49,7 +49,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    background-color: #aaa;
+    background-color: red;
     border-radius: 9999em;
     -webkit-transition: background-color 0.25s ease;
     -o-transition: background-color 0.25s ease;
@@ -61,13 +61,13 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background-color: #fff;
+    background-color: red;
     -webkit-transition: left 0.25s ease;
     -o-transition: left 0.25s ease;
     transition: left 0.25s ease;
   }
   .switch-input:checked + .switch-label::before {
-    background-color: rgb(32, 96, 149);
+    background-color: red;
   }
   .switch-input:checked + .switch-label::after {
     left: 27px;
